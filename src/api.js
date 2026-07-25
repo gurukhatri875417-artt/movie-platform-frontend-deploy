@@ -1,9 +1,4 @@
-import axios from 'axios';
+// Centralized API configuration pointing directly to Render backend
+const API_BASE_URL = 'https://movie-platform-backend-g5w5.onrender.com';
 
-const API_URL = "https://movie-platform-backend-g5w5.onrender.com";
-
-const API = axios.create({
-  baseURL: API_URL,
-});
-
-export default API;
+export default API_BASE_URL;
