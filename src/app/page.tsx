@@ -1,136 +1,149 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-
-interface Movie {
-  id: string;
-  title: string;
-  description: string;
-  posterUrl: string;
-  genre: string;
-  quality: string;
-}
-
-const GENRES = ['All', 'Sci-Fi', 'Fantasy', 'Animation'];
+import React, { useEffect, useState, useRef } from 'react';
 
 export default function HomePage() {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [search, setSearch] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('All');
+  const [movies, setMovies] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Reference for the native banner container
+  const bannerRef = useRef<HTMLDivElement>(null);
+
+  // 1. Fetch Movies from Live Render Backend
   useEffect(() => {
-    const fetchMovies = async () => {
-      setLoading(true);
+    async function fetchMovies() {
       try {
-        const query = new URLSearchParams();
-        if (search) query.append('search', search);
-        if (selectedGenre !== 'All') query.append('genre', selectedGenre);
+        setLoading(true);
+        const backendUrl = 'https://movie-platform-backend-g5w5.onrender.com';
+        const res = await fetch(`${backendUrl}/movies`);
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
 
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-        const res = await fetch(`${backendUrl}/movies?${query.toString()}`);
         const json = await res.json();
-        setMovies(json.data || []);
-      } catch (err) {
-        console.error(err);
+        setMovies(Array.isArray(json) ? json : (json.data || []));
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch movies');
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    const timer = setTimeout(fetchMovies, 300);
-    return () => clearTimeout(timer);
-  }, [search, selectedGenre]);
+    fetchMovies();
+  }, []);
+
+  // 2. Inject Popunder Script on Page Load
+  useEffect(() => {
+    const popunderScript = document.createElement('script');
+    popunderScript.src = 'https://pl30515811.effectivecpmnetwork.com/e4/d5/cf/e4d5cfac6ae8b6d240c200932bf8c02f.js';
+    popunderScript.async = true;
+    document.body.appendChild(popunderScript);
+
+    return () => {
+      // Cleanup script if component unmounts
+      try {
+        document.body.removeChild(popunderScript);
+      } catch (e) {}
+    };
+  }, []);
+
+  // 3. Inject Native Banner Script into Container
+  useEffect(() => {
+    if (bannerRef.current && !bannerRef.current.hasChildNodes()) {
+      const bannerScript = document.createElement('script');
+      bannerScript.async = true;
+      bannerScript.setAttribute('data-cfasync', 'false');
+      bannerScript.src = 'https://pl30516037.effectivecpmnetwork.com/f4811c63390720e9c05b975e50520e84/invoke.js';
+      
+      bannerRef.current.appendChild(bannerScript);
+    }
+  }, []);
+
+  const filteredMovies = movies.filter((movie) => {
+    const title = movie.title || '';
+    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || movie.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 p-8 md:p-16">
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-10 text-center md:text-left">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2">
-            Stream & Download Portal
-          </h1>
-          <p className="text-slate-400 text-lg">
-            Search and stream high-definition movies powered by Next.js, Express & PostgreSQL.
-          </p>
-        </header>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f4f6f9', fontFamily: 'Arial, sans-serif' }}>
+      {/* Navbar / Header with Search Bar */}
+      <header style={{ backgroundColor: '#1f2937', color: '#fff', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 style={{ margin: 0, fontSize: '24px' }}>🎬 Movie Platform</h1>
+        <div style={{ width: '300px' }}>
+          <input
+            type="text"
+            placeholder="Search movies..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: 'none', outline: 'none' }}
+          />
+        </div>
+      </header>
 
-        {/* Search Bar & Category Filter Controls */}
-        <section className="mb-10 space-y-4">
-          <div className="relative w-full max-w-xl">
-            <input
-              type="text"
-              placeholder="Search movies by title or description..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 text-white rounded-xl px-5 py-3.5 pl-11 focus:outline-none focus:border-red-500 transition-colors shadow-inner"
-            />
-            <span className="absolute left-4 top-3.5 text-slate-500">??</span>
-          </div>
-
-          {/* Genre Badges */}
-          <div className="flex flex-wrap gap-2.5 items-center">
-            <span className="text-xs text-slate-400 font-semibold mr-2">Categories:</span>
-            {GENRES.map((genre) => (
-              <button
-                key={genre}
-                onClick={() => setSelectedGenre(genre)}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  selectedGenre === genre
-                    ? 'bg-red-600 text-white shadow-md shadow-red-900/30'
-                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white hover:border-slate-700'
-                }`}
+      {/* Main Layout Container */}
+      <div style={{ display: 'flex', padding: '30px', gap: '30px', maxWidth: '1200px', margin: '0 auto' }}>
+        
+        {/* Sidebar / Categories */}
+        <aside style={{ width: '220px', backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', height: 'fit-content' }}>
+          <h3>Categories</h3>
+          <ul style={{ listStyle: 'none', padding: 0, marginTop: '15px' }}>
+            {['All', 'Action', 'Sci-Fi', 'Drama'].map((cat) => (
+              <li
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                style={{
+                  padding: '10px',
+                  cursor: 'pointer',
+                  borderRadius: '4px',
+                  backgroundColor: selectedCategory === cat ? '#e5e7eb' : 'transparent',
+                  fontWeight: selectedCategory === cat ? 'bold' : 'normal',
+                  marginBottom: '5px'
+                }}
               >
-                {genre}
-              </button>
+                {cat}
+              </li>
             ))}
-          </div>
-        </section>
+          </ul>
+        </aside>
 
-        {/* Movie Grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {loading ? (
-            <div className="col-span-full text-center py-12 text-slate-500">Loading movies...</div>
-          ) : movies.length > 0 ? (
-            movies.map((movie) => (
-              <Link
-                key={movie.id}
-                href={`/watch/${movie.id}`}
-                className="group bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-red-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-red-950/20 flex flex-col"
-              >
-                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-800">
-                  <img
-                    src={movie.posterUrl}
-                    alt={movie.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <span className="absolute top-3 right-3 bg-red-600/90 text-white text-xs font-semibold px-2.5 py-1 rounded shadow">
-                    {movie.quality}
-                  </span>
-                  <span className="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-sm text-slate-300 text-xs px-2.5 py-1 rounded border border-slate-700">
-                    {movie.genre}
-                  </span>
-                </div>
-                <div className="p-5 flex flex-col flex-grow">
-                  <h2 className="text-xl font-bold text-white mb-2 group-hover:text-red-400 transition-colors">
-                    {movie.title}
-                  </h2>
-                  <p className="text-slate-400 text-sm line-clamp-2 mb-4 flex-grow">
-                    {movie.description}
-                  </p>
-                  <span className="text-xs font-semibold text-red-500 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                    Watch Stream & Download ?
-                  </span>
-                </div>
-              </Link>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12 text-slate-500">
-              No movies matched your search criteria.
+        {/* Content Area */}
+        <main style={{ flex: 1 }}>
+          
+          {/* Native Banner Ad Unit */}
+          <div style={{ backgroundColor: '#ffffff', padding: '15px', textAlign: 'center', borderRadius: '8px', marginBottom: '25px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', minHeight: '90px' }}>
+            <div id="container-f4811c63390720e9c05b975e50520e84" ref={bannerRef}></div>
+          </div>
+
+          <h2>Movies List</h2>
+
+          {loading && <p>Loading movies...</p>}
+          {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+
+          {!loading && !error && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px', marginTop: '20px' }}>
+              {filteredMovies.length > 0 ? (
+                filteredMovies.map((movie, index) => (
+                  <div key={movie.id || index} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                    <div style={{ height: '140px', backgroundColor: '#d1d5db', borderRadius: '4px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
+                      Poster
+                    </div>
+                    <h4 style={{ margin: '10px 0 5px 0' }}>{movie.title || 'Untitled'}</h4>
+                    <p style={{ margin: 0, color: '#6b7280', fontSize: '14px' }}>{movie.category || 'General'}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No movies match your search.</p>
+              )}
             </div>
           )}
-        </section>
+        </main>
       </div>
-    </main>
+    </div>
   );
 }
