@@ -48,7 +48,7 @@ function App() {
         setTitle('');
         setPoster('');
         setVideoUrl('');
-        fetchMovies(); // Automatically refresh the list below
+        fetchMovies();
       } else {
         setMessage('Upload failed: ' + (data.error || JSON.stringify(data)));
       }
@@ -58,18 +58,18 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: 'auto' }}>
-      <h1>Admin Movie Upload Panel</h1>
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: 'auto', color: '#111111', background: '#ffffff' }}>
+      <h1 style={{ color: '#000000' }}>Admin Movie Upload Panel</h1>
       
-      <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#f4f4f4', padding: '20px', borderRadius: '8px' }}>
-        <h3>Add New Movie</h3>
+      <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: '#f8f9fa', padding: '20px', borderRadius: '8px', border: '1px solid #ccc' }}>
+        <h3 style={{ margin: '0 0 5px 0', color: '#222222' }}>Add New Movie</h3>
         <input
           type="text"
           placeholder="Movie Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          style={{ padding: '10px', fontSize: '16px' }}
+          style={{ padding: '12px', fontSize: '16px', color: '#000000', background: '#ffffff', border: '1px solid #999', borderRadius: '4px' }}
         />
         <input
           type="text"
@@ -77,7 +77,7 @@ function App() {
           value={poster}
           onChange={(e) => setPoster(e.target.value)}
           required
-          style={{ padding: '10px', fontSize: '16px' }}
+          style={{ padding: '12px', fontSize: '16px', color: '#000000', background: '#ffffff', border: '1px solid #999', borderRadius: '4px' }}
         />
         <input
           type="text"
@@ -85,23 +85,23 @@ function App() {
           value={videoUrl}
           onChange={(e) => setVideoUrl(e.target.value)}
           required
-          style={{ padding: '10px', fontSize: '16px' }}
+          style={{ padding: '12px', fontSize: '16px', color: '#000000', background: '#ffffff', border: '1px solid #999', borderRadius: '4px' }}
         />
-        <button type="submit" style={{ padding: '10px', background: '#0070f3', color: '#fff', border: 'none', fontSize: '16px', cursor: 'pointer' }}>
+        <button type="submit" style={{ padding: '12px', background: '#0056b3', color: '#ffffff', border: 'none', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px' }}>
           Upload Movie
         </button>
-        {message && <p style={{ fontWeight: 'bold', color: message.includes('success') ? 'green' : 'red' }}>{message}</p>}
+        {message && <p style={{ fontWeight: 'bold', color: message.includes('success') ? 'green' : 'red', margin: '5px 0' }}>{message}</p>}
       </form>
 
-      <hr style={{ margin: '30px 0' }} />
+      <hr style={{ margin: '30px 0', border: '0', borderTop: '1px solid #ccc' }} />
 
-      <h2>Uploaded Movies List ({movies.length})</h2>
+      <h2 style={{ color: '#000000' }}>Uploaded Movies List ({movies.length})</h2>
       {movies.length === 0 ? (
-        <p>No movies uploaded yet.</p>
+        <p style={{ color: '#333333' }}>No movies uploaded yet.</p>
       ) : (
         <div style={{ display: 'grid', gap: '15px' }}>
           {movies.map((movie, index) => (
-            <div key={index} style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px', display: 'flex', gap: '15px', alignItems: 'center', background: '#fff' }}>
+            <div key={index} style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px', display: 'flex', gap: '15px', alignItems: 'center', background: '#ffffff' }}>
               {movie.poster && (
                 <img 
                   src={movie.poster} 
@@ -111,12 +111,12 @@ function App() {
                 />
               )}
               <div style={{ flex: 1 }}>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>{movie.title}</h4>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#000000' }}>{movie.title}</h4>
                 <a 
                   href={movie.videoUrl} 
                   target="_blank" 
                   rel="noreferrer" 
-                  style={{ display: 'inline-block', padding: '6px 12px', background: '#0070f3', color: '#fff', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}
+                  style={{ display: 'inline-block', padding: '8px 14px', background: '#0056b3', color: '#ffffff', textDecoration: 'none', borderRadius: '4px', fontSize: '14px', fontWeight: 'bold' }}
                 >
                   Play / Watch Video
                 </a>
