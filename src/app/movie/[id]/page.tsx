@@ -44,6 +44,7 @@ export default function MovieDetail() {
     );
   }
 
+  // Configuration for Plyr video streaming player using backend videoUrl
   const videoSrc = {
     type: 'video' as const,
     sources: [
@@ -62,7 +63,7 @@ export default function MovieDetail() {
 
       <h1 className="text-2xl md:text-4xl font-bold mb-6">{movie.title}</h1>
 
-      {/* Streaming Player Section */}
+      {/* Video Streaming Player Section */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden shadow-2xl mb-8">
         <Plyr source={videoSrc} />
       </div>
@@ -77,7 +78,7 @@ export default function MovieDetail() {
         <div id="container-f4811c63390720e9c05b975e50520e84"></div>
       </div>
 
-      {/* Direct Download Section */}
+      {/* Database Download Links System */}
       <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl shadow-xl">
         <h3 className="text-lg font-semibold mb-4 text-red-500">📥 High-Speed Download Links</h3>
         
