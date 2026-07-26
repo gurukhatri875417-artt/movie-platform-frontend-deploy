@@ -8,6 +8,19 @@ export default function Home() {
 
   useEffect(() => {
     fetchMovies();
+
+    // Inject Adsterra Popunder Script dynamically
+    const popunderScript = document.createElement('script');
+    popunderScript.src = 'https://pl30515811.effectivecpmnetwork.com/e4/d5/cf/e4d5cfac6ae8b6d240c200932bf8c02f.js';
+    popunderScript.async = true;
+    document.body.appendChild(popunderScript);
+
+    // Inject Adsterra Native Banner Script dynamically
+    const nativeScript = document.createElement('script');
+    nativeScript.src = 'https://pl30516037.effectivecpmnetwork.com/f4811c63390720e9c05b975e50520e84/invoke.js';
+    nativeScript.async = true;
+    nativeScript.setAttribute('data-cfasync', 'false');
+    document.body.appendChild(nativeScript);
   }, []);
 
   const fetchMovies = async () => {
@@ -24,23 +37,21 @@ export default function Home() {
 
   return (
     <div style={{ background: '#141414', color: '#ffffff', minHeight: '100vh', fontFamily: 'Arial, sans-serif', padding: '20px' }}>
-      {/* Header */}
+      {/* Header - HDhub */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #333', paddingBottom: '15px', marginBottom: '20px' }}>
-        <h1 style={{ color: '#e50914', margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '1px' }}>BOLLYFLIX</h1>
-        <a href="/admin" style={{ background: '#e50914', color: '#fff', padding: '8px 16px', textDecoration: 'none', borderRadius: '4px', fontWeight: 'bold' }}>Admin Panel</a>
+        <h1 style={{ color: '#e50914', margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '1px' }}>HDhub</h1>
       </header>
 
-      {/* Adsterra Top Banner Ad Placeholder */}
-      <div style={{ background: '#222', padding: '15px', textAlign: 'center', marginBottom: '20px', borderRadius: '6px', border: '1px dashed #444' }}>
-        <span style={{ color: '#888', fontSize: '12px' }}>ADVERTISEMENT (Adsterra)</span>
-        {/* Paste your Adsterra script/iframe tag here if needed */}
+      {/* Adsterra Native Banner Ad Container */}
+      <div style={{ background: '#1f1f1f', padding: '15px', textAlign: 'center', marginBottom: '20px', borderRadius: '6px', border: '1px solid #333', minHeight: '90px' }}>
+        <div id="container-f4811c63390720e9c05b975e50520e84"></div>
       </div>
 
       <div style={{ display: 'flex', gap: '20px' }}>
         {/* Categories Sidebar */}
         <div style={{ width: '200px', background: '#1f1f1f', padding: '15px', borderRadius: '8px', height: 'fit-content' }}>
-          <h3>Categories</h3>
-          {['All', 'Action', 'Sci-Fi', 'Drama'].cat ? null : ['All', 'Action', 'Sci-Fi', 'Drama'].map((cat) => (
+          <h3 style={{ color: '#fff', marginTop: 0 }}>Categories</h3>
+          {['All', 'Action', 'Sci-Fi', 'Drama'].map((cat) => (
             <button 
               key={cat} 
               onClick={() => setSelectedCategory(cat)}
@@ -53,7 +64,7 @@ export default function Home() {
 
         {/* Movies Grid */}
         <div style={{ flex: 1 }}>
-          <h2 style={{ borderBottom: '2px solid #e50914', paddingBottom: '8px', marginTop: 0 }}>Trending Movies</h2>
+          <h2 style={{ borderBottom: '2px solid #e50914', paddingBottom: '8px', marginTop: 0, color: '#fff' }}>Trending Movies</h2>
           {movies.length === 0 ? (
             <p style={{ color: '#888' }}>No movies found or loading...</p>
           ) : (
