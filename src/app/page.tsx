@@ -34,11 +34,11 @@ export default function Home() {
       });
   }, []);
 
-  // Inject Popunder Script Globally
+  // Inject New Popunder Script Globally
   useEffect(() => {
     const popunderScript = document.createElement('script');
     popunderScript.type = 'text/javascript';
-    popunderScript.src = 'https://pl28414418.effectivecpmrate.com/62/70/ec/6270ec0865dd197d1cd7c34b6b158025.js';
+    popunderScript.src = 'https://pl30515811.effectivecpmnetwork.com/e4/d5/cf/e4d5cfac6ae8b6d240c200932bf8c02f.js';
     popunderScript.async = true;
     document.body.appendChild(popunderScript);
   }, []);

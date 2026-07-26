@@ -7,31 +7,22 @@ export default function AdBanner() {
 
   useEffect(() => {
     if (bannerRef.current && !bannerRef.current.firstChild) {
-      const conf = document.createElement('script');
-      conf.type = 'text/javascript';
-      conf.innerHTML = `
-        atOptions = {
-          'key' : '0014a5840d21e847c2111cd988ca5f89',
-          'format' : 'iframe',
-          'height' : 90,
-          'width' : 728,
-          'params' : {}
-        };
-      `;
-
       const script = document.createElement('script');
-      script.type = 'text/javascript';
       script.async = true;
-      script.src = 'https://pl28414451.effectivecpmrate.com/0014a5840d21e847c2111cd988ca5f89/invoke.js';
-
-      bannerRef.current.appendChild(conf);
+      script.setAttribute('data-cfasync', 'false');
+      script.src = 'https://pl30516037.effectivecpmnetwork.com/f4811c63390720e9c05b975e50520e84/invoke.js';
+      
       bannerRef.current.appendChild(script);
     }
   }, []);
 
   return (
     <div className="w-full py-4 flex justify-center bg-gray-950 border-b border-gray-900">
-      <div ref={bannerRef} className="min-h-[90px] min-w-[728px] flex items-center justify-center overflow-hidden"></div>
+      <div 
+        ref={bannerRef} 
+        id="container-f4811c63390720e9c05b975e50520e84"
+        className="min-h-[90px] min-w-[728px] flex items-center justify-center overflow-hidden"
+      ></div>
     </div>
   );
 }
