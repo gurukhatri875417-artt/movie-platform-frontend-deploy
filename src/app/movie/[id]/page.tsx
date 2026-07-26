@@ -1,70 +1,69 @@
-'use client';
+import React from 'react';
+import VideoPlayer from '@/app/components/VideoPlayer';
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import VideoPlayer from '../../components/VideoPlayer';
-import AdBanner from '../../AdBanner';
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
 
-export default function MovieDetail() {
-  const { id } = useParams();
-  const [movie, setMovie] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`https://movie-platform-backend-g5w5.onrender.com/movies/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setMovie(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error fetching movie:', err);
-        setLoading(false);
-      });
-  }, [id]);
-
-  if (loading) {
-    return <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">Loading movie...</div>;
+export default async function MovieDetailPage({ params }: PageProps) {
+  const { id } = params;
+  
+  let movie: any = null;
+  try {
+    const res = await fetch(`https://movie-platform-backend-g5w5.onrender.com/api/movies/${id}`, {
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      movie = await res.json();
+    }
+  } catch (error) {
+    console.error('Failed to fetch movie details:', error);
   }
 
   if (!movie) {
-    return <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">Movie not found.</div>;
+    return (
+      <main className="max-w-6xl mx-auto px-4 py-16 text-center text-white">
+        <h1 className="text-2xl font-bold">Movie not found</h1>
+        <p className="text-gray-400 mt-2">The requested movie could not be loaded.</p>
+      </main>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white font-sans p-6 max-w-5xl mx-auto">
-      {/* Header Back Button */}
-      <div className="mb-6">
-        <a href="/" className="text-red-500 hover:underline text-sm font-semibold">&larr; Back to Home</a>
-      </div>
+    <main className="max-w-6xl mx-auto px-4 py-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">{movie.title}</h1>
+      
+      {/* Video Stream Player */}
+      <VideoPlayer videoUrl={movie.videoUrl || ''} />
 
-      <h1 className="text-3xl font-black mb-4 text-red-600">{movie.title}</h1>
-
-      {/* Embedded Native Video Player */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-3 text-gray-200">Watch Online</h2>
-        <VideoPlayer videoUrl={movie.videoUrl} />
-      </div>
-
-      <AdBanner />
-
-      {/* Download Section */}
-      {movie.downloadUrl && (
-        <div className="mt-8 bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div>
-            <h3 className="text-lg font-bold">Download Movie</h3>
-            <p className="text-gray-400 text-sm">Get high-speed download access for {movie.title}</p>
-          </div>
-          <a
-            href={movie.downloadUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-green-600/20"
-          >
-            Download Now 🚀
-          </a>
+      {/* Direct Download Options Section */}
+      <div className="mt-8 bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl">
+        <h3 className="text-xl font-semibold text-white mb-4">Download Links</h3>
+        <div className="flex flex-wrap gap-4">
+          {movie.downloadUrl720p && (
+            <a 
+              href={movie.downloadUrl720p} 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium border border-gray-700 transition"
+            >
+              Download 720p
+            </a>
+          )}
+          {movie.downloadUrl1080p && (
+            <a 
+              href={movie.downloadUrl1080p} 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition"
+            >
+              Download 1080p
+            </a>
+          )}
         </div>
-      )}
+      </div>
     </main>
   );
 }
