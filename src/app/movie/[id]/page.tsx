@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
-// Dynamically import Plyr to prevent server-side rendering issues
 const Plyr = dynamic(() => import('plyr-react'), { ssr: false });
 import 'plyr-react/plyr.css';
 
@@ -45,7 +44,6 @@ export default function MovieDetail() {
     );
   }
 
-  // Configure video source for Plyr
   const videoSrc = {
     type: 'video' as const,
     sources: [
@@ -69,7 +67,17 @@ export default function MovieDetail() {
         <Plyr source={videoSrc} />
       </div>
 
-      {/* Direct Download Section (Bollyflix style) */}
+      {/* Native Bar Ad Section on Detail Page */}
+      <div className="my-6 flex justify-center bg-gray-900 border border-gray-800 p-4 rounded-xl">
+        <script 
+          async 
+          data-cfasync="false" 
+          src="https://pl30516037.effectivecpmnetwork.com/f4811c63390720e9c05b975e50520e84/invoke.js"
+        ></script>
+        <div id="container-f4811c63390720e9c05b975e50520e84"></div>
+      </div>
+
+      {/* Direct Download Section */}
       <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl shadow-xl">
         <h3 className="text-lg font-semibold mb-4 text-red-500">📥 High-Speed Download Links</h3>
         

@@ -29,13 +29,23 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 py-8 md:px-12">
-      <header className="flex justify-between items-center mb-10 border-b border-gray-800 pb-4">
+    <div className="min-h-screen bg-black text-white px-4 py-8 md:px-12 max-w-7xl mx-auto">
+      <header className="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
         <h1 className="text-3xl font-extrabold text-red-600 tracking-wider">BOLLYFLIX CLONE</h1>
         <Link href="/admin" className="text-sm px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition">
           Admin Portal
         </Link>
       </header>
+
+      {/* Native Bar Ad Section */}
+      <div className="my-6 flex justify-center bg-gray-900 border border-gray-800 p-4 rounded-xl">
+        <script 
+          async 
+          data-cfasync="false" 
+          src="https://pl30516037.effectivecpmnetwork.com/f4811c63390720e9c05b975e50520e84/invoke.js"
+        ></script>
+        <div id="container-f4811c63390720e9c05b975e50520e84"></div>
+      </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {movies.map((movie) => (
