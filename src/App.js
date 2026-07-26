@@ -7,10 +7,8 @@ function App() {
   const [movies, setMovies] = useState([]);
   const [message, setMessage] = useState('');
 
-  // Hardcoded Render Backend URL to completely eliminate 404 errors
-  const BACKEND_URL = 'https://movie-platform-backend-g5w5.onrender.com/api/movies';
+  const BACKEND_URL = 'https://movie-platform-backend-g5w5.onrender.com/movies';
 
-  // Fetch movies list on load
   useEffect(() => {
     fetchMovies();
   }, []);
@@ -18,27 +16,29 @@ function App() {
   const fetchMovies = async () => {
     try {
       const res = await fetch(BACKEND_URL);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setMovies(data);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) setMovies(data);
       }
     } catch (err) {
       console.error("Error fetching movies:", err);
     }
   };
 
-  // Handle Admin Movie Upload
   const handleUpload = async (e) => {
     e.preventDefault();
     setMessage('Uploading...');
 
     try {
+      const payload = { title, poster, videoUrl };
+
       const response = await fetch(BACKEND_URL, {
         method: 'POST',
         headers: {
+          'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title, poster, videoUrl }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -48,9 +48,9 @@ function App() {
         setTitle('');
         setPoster('');
         setVideoUrl('');
-        fetchMovies(); // Refresh list
+        fetchMovies(); // Automatically refresh the list below
       } else {
-        setMessage('Upload failed: ' + (data.error || 'Unknown error'));
+        setMessage('Upload failed: ' + (data.error || JSON.stringify(data)));
       }
     } catch (err) {
       setMessage('Network error: ' + err.message);
@@ -95,17 +95,31 @@ function App() {
 
       <hr style={{ margin: '30px 0' }} />
 
-      <h2>Movies List ({movies.length})</h2>
+      <h2>Uploaded Movies List ({movies.length})</h2>
       {movies.length === 0 ? (
         <p>No movies uploaded yet.</p>
       ) : (
         <div style={{ display: 'grid', gap: '15px' }}>
           {movies.map((movie, index) => (
-            <div key={index} style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px', display: 'flex', gap: '15px', alignItems: 'center' }}>
-              {movie.poster && <img src={movie.poster} alt={movie.title} style={{ width: '60px', height: '90px', objectFit: 'cover' }} />}
-              <div>
-                <h4 style={{ margin: '0 0 5px 0' }}>{movie.title}</h4>
-                <a href={movie.videoUrl} target="_blank" rel="noreferrer" style={{ color: '#0070f3' }}>Watch Link</a>
+            <div key={index} style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px', display: 'flex', gap: '15px', alignItems: 'center', background: '#fff' }}>
+              {movie.poster && (
+                <img 
+                  src={movie.poster} 
+                  alt={movie.title} 
+                  style={{ width: '60px', height: '90px', objectFit: 'cover', borderRadius: '4px' }} 
+                  onError={(e)=>{e.target.style.display='none'}} 
+                />
+              )}
+              <div style={{ flex: 1 }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>{movie.title}</h4>
+                <a 
+                  href={movie.videoUrl} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  style={{ display: 'inline-block', padding: '6px 12px', background: '#0070f3', color: '#fff', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}
+                >
+                  Play / Watch Video
+                </a>
               </div>
             </div>
           ))}
