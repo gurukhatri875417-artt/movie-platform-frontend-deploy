@@ -60,7 +60,7 @@ function App() {
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: 'auto', color: '#000000', background: '#ffffff' }}>
       <h1 style={{ color: '#000000', fontSize: '28px', fontWeight: '900' }}>Admin Movie Upload Panel</h1>
-      
+
       <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: '#e9ecef', padding: '20px', borderRadius: '8px', border: '2px solid #000000' }}>
         <h3 style={{ margin: '0 0 5px 0', color: '#000000', fontWeight: '900' }}>Add New Movie</h3>
         <input
