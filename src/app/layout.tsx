@@ -5,7 +5,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Bollyflix Clone - Watch & Download Movies',
+  title: 'HBHUB - Watch & Download Movies',
   description: 'High-speed movie streaming and downloading platform',
 };
 
