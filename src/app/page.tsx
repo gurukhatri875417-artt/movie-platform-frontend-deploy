@@ -1,149 +1,131 @@
-'use client';
+'client';
+import React, { useState, useEffect } from 'react';
 
-import React, { useEffect, useState, useRef } from 'react';
+export default function Home() {
+  const [title, setTitle] = useState('');
+  const [poster, setPoster] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [movies, setMovies] = useState([]);
+  const [message, setMessage] = useState('');
 
-export default function HomePage() {
-  const [movies, setMovies] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const BACKEND_URL = 'https://movie-platform-backend-g5w5.onrender.com/movies';
 
-  // Reference for the native banner container
-  const bannerRef = useRef<HTMLDivElement>(null);
-
-  // 1. Fetch Movies from Live Render Backend
   useEffect(() => {
-    async function fetchMovies() {
-      try {
-        setLoading(true);
-        const backendUrl = 'https://movie-platform-backend-g5w5.onrender.com';
-        const res = await fetch(`${backendUrl}/movies`);
-        
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-
-        const json = await res.json();
-        setMovies(Array.isArray(json) ? json : (json.data || []));
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch movies');
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchMovies();
   }, []);
 
-  // 2. Inject Popunder Script on Page Load
-  useEffect(() => {
-    const popunderScript = document.createElement('script');
-    popunderScript.src = 'https://pl30515811.effectivecpmnetwork.com/e4/d5/cf/e4d5cfac6ae8b6d240c200932bf8c02f.js';
-    popunderScript.async = true;
-    document.body.appendChild(popunderScript);
-
-    return () => {
-      // Cleanup script if component unmounts
-      try {
-        document.body.removeChild(popunderScript);
-      } catch (e) {}
-    };
-  }, []);
-
-  // 3. Inject Native Banner Script into Container
-  useEffect(() => {
-    if (bannerRef.current && !bannerRef.current.hasChildNodes()) {
-      const bannerScript = document.createElement('script');
-      bannerScript.async = true;
-      bannerScript.setAttribute('data-cfasync', 'false');
-      bannerScript.src = 'https://pl30516037.effectivecpmnetwork.com/f4811c63390720e9c05b975e50520e84/invoke.js';
-      
-      bannerRef.current.appendChild(bannerScript);
+  const fetchMovies = async () => {
+    try {
+      const res = await fetch(BACKEND_URL);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) setMovies(data);
+      }
+    } catch (err) {
+      console.error("Error fetching movies:", err);
     }
-  }, []);
+  };
 
-  const filteredMovies = movies.filter((movie) => {
-    const title = movie.title || '';
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || movie.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    setMessage('Uploading...');
+
+    try {
+      const payload = { title, poster, videoUrl };
+
+      const response = await fetch(BACKEND_URL, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('Movie uploaded successfully!');
+        setTitle('');
+        setPoster('');
+        setVideoUrl('');
+        fetchMovies();
+      } else {
+        setMessage('Upload failed: ' + (data.error || JSON.stringify(data)));
+      }
+    } catch (err) {
+      setMessage('Network error: ' + err.message);
+    }
+  };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f4f6f9', fontFamily: 'Arial, sans-serif' }}>
-      {/* Navbar / Header with Search Bar */}
-      <header style={{ backgroundColor: '#1f2937', color: '#fff', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ margin: 0, fontSize: '24px' }}>🎬 Movie Platform</h1>
-        <div style={{ width: '300px' }}>
-          <input
-            type="text"
-            placeholder="Search movies..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: 'none', outline: 'none' }}
-          />
-        </div>
-      </header>
+    <main style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: 'auto', color: '#000000', background: '#ffffff', minHeight: '100vh' }}>
+      <h1 style={{ color: '#000000', fontSize: '28px', fontWeight: '900' }}>Admin Movie Upload Panel</h1>
+      
+      <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: '#e9ecef', padding: '20px', borderRadius: '8px', border: '2px solid #000000' }}>
+        <h3 style={{ margin: '0 0 5px 0', color: '#000000', fontWeight: '900' }}>Add New Movie</h3>
+        <input
+          type="text"
+          placeholder="Movie Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          style={{ padding: '12px', fontSize: '16px', color: '#000000', background: '#ffffff', border: '2px solid #000000', borderRadius: '4px', fontWeight: 'bold' }}
+        />
+        <input
+          type="text"
+          placeholder="Poster Image URL"
+          value={poster}
+          onChange={(e) => setPoster(e.target.value)}
+          required
+          style={{ padding: '12px', fontSize: '16px', color: '#000000', background: '#ffffff', border: '2px solid #000000', borderRadius: '4px', fontWeight: 'bold' }}
+        />
+        <input
+          type="text"
+          placeholder="Video Stream URL"
+          value={videoUrl}
+          onChange={(e) => setVideoUrl(e.target.value)}
+          required
+          style={{ padding: '12px', fontSize: '16px', color: '#000000', background: '#ffffff', border: '2px solid #000000', borderRadius: '4px', fontWeight: 'bold' }}
+        />
+        <button type="submit" style={{ padding: '14px', background: '#000000', color: '#ffffff', border: 'none', fontSize: '18px', fontWeight: '900', cursor: 'pointer', borderRadius: '4px' }}>
+          UPLOAD MOVIE
+        </button>
+        {message && <p style={{ fontWeight: '900', color: message.includes('success') ? 'green' : 'red', margin: '5px 0', fontSize: '16px' }}>{message}</p>}
+      </form>
 
-      {/* Main Layout Container */}
-      <div style={{ display: 'flex', padding: '30px', gap: '30px', maxWidth: '1200px', margin: '0 auto' }}>
-        
-        {/* Sidebar / Categories */}
-        <aside style={{ width: '220px', backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', height: 'fit-content' }}>
-          <h3>Categories</h3>
-          <ul style={{ listStyle: 'none', padding: 0, marginTop: '15px' }}>
-            {['All', 'Action', 'Sci-Fi', 'Drama'].map((cat) => (
-              <li
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                style={{
-                  padding: '10px',
-                  cursor: 'pointer',
-                  borderRadius: '4px',
-                  backgroundColor: selectedCategory === cat ? '#e5e7eb' : 'transparent',
-                  fontWeight: selectedCategory === cat ? 'bold' : 'normal',
-                  marginBottom: '5px'
-                }}
-              >
-                {cat}
-              </li>
-            ))}
-          </ul>
-        </aside>
+      <hr style={{ margin: '30px 0', border: '0', borderTop: '2px solid #000000' }} />
 
-        {/* Content Area */}
-        <main style={{ flex: 1 }}>
-          
-          {/* Native Banner Ad Unit */}
-          <div style={{ backgroundColor: '#ffffff', padding: '15px', textAlign: 'center', borderRadius: '8px', marginBottom: '25px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', minHeight: '90px' }}>
-            <div id="container-f4811c63390720e9c05b975e50520e84" ref={bannerRef}></div>
-          </div>
-
-          <h2>Movies List</h2>
-
-          {loading && <p>Loading movies...</p>}
-          {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-
-          {!loading && !error && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px', marginTop: '20px' }}>
-              {filteredMovies.length > 0 ? (
-                filteredMovies.map((movie, index) => (
-                  <div key={movie.id || index} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    <div style={{ height: '140px', backgroundColor: '#d1d5db', borderRadius: '4px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#374151' }}>
-                      Poster
-                    </div>
-                    <h4 style={{ margin: '10px 0 5px 0' }}>{movie.title || 'Untitled'}</h4>
-                    <p style={{ margin: 0, color: '#6b7280', fontSize: '14px' }}>{movie.category || 'General'}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No movies match your search.</p>
+      <h2 style={{ color: '#000000', fontWeight: '900' }}>Uploaded Movies List ({movies.length})</h2>
+      {movies.length === 0 ? (
+        <p style={{ color: '#000000', fontWeight: 'bold' }}>No movies uploaded yet.</p>
+      ) : (
+        <div style={{ display: 'grid', gap: '15px' }}>
+          {movies.map((movie, index) => (
+            <div key={index} style={{ border: '2px solid #000000', padding: '15px', borderRadius: '8px', display: 'flex', gap: '15px', alignItems: 'center', background: '#ffffff' }}>
+              {movie.poster && (
+                <img 
+                  src={movie.poster} 
+                  alt={movie.title} 
+                  style={{ width: '60px', height: '90px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #000000' }} 
+                  onError={(e)=>{e.target.style.display='none'}} 
+                />
               )}
+              <div style={{ flex: 1 }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#000000', fontWeight: '900' }}>{movie.title}</h4>
+                <a 
+                  href={movie.videoUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  style={{ display: 'inline-block', padding: '10px 16px', background: '#000000', color: '#ffffff', textDecoration: 'none', borderRadius: '4px', fontSize: '14px', fontWeight: '900' }}
+                >
+                  PLAY / WATCH VIDEO
+                </a>
+              </div>
             </div>
-          )}
-        </main>
-      </div>
-    </div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
