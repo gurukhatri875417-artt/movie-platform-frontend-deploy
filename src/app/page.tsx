@@ -24,7 +24,6 @@ export default function Home() {
     fetch('https://movie-platform-backend-g5w5.onrender.com/movies')
       .then((res) => res.json())
       .then((data) => {
-        // Ensure data is an array
         setMovies(Array.isArray(data) ? data : data.movies || []);
         setLoading(false);
       })
@@ -34,22 +33,20 @@ export default function Home() {
       });
   }, []);
 
-  // Inject Adsterra Scripts Dynamically
+  // Reliable Adsterra Script Injector
   useEffect(() => {
-    // Popunder Script
+    // 1. Inject Popunder Script
     const popunderScript = document.createElement('script');
     popunderScript.type = 'text/javascript';
     popunderScript.src = 'https://pl28414418.effectivecpmrate.com/62/70/ec/6270ec0865dd197d1cd7c34b6b158025.js';
+    popunderScript.async = true;
     document.body.appendChild(popunderScript);
 
-    // Native Banner Script Container Setup
+    // 2. Inject Native Banner Options & Script
     const bannerContainer = document.getElementById('adsterra-native-banner');
-    if (bannerContainer && !bannerContainer.hasChildNodes()) {
-      const invokeScript = document.createElement('script');
-      invokeScript.async = true;
-      invokeScript.setAttribute('data-cfasync', 'false');
-      invokeScript.src = '//pl28414451.effectivecpmrate.com/0014a5840d21e847c2111cd988ca5f89/invoke.js';
-      
+    if (bannerContainer) {
+      bannerContainer.innerHTML = ''; // Clear out to prevent duplicates
+
       const optionsScript = document.createElement('script');
       optionsScript.type = 'text/javascript';
       optionsScript.innerHTML = `
@@ -61,6 +58,12 @@ export default function Home() {
           'params' : {}
         };
       `;
+
+      const invokeScript = document.createElement('script');
+      invokeScript.type = 'text/javascript';
+      invokeScript.async = true;
+      invokeScript.src = '//pl28414451.effectivecpmrate.com/0014a5840d21e847c2111cd988ca5f89/invoke.js';
+
       bannerContainer.appendChild(optionsScript);
       bannerContainer.appendChild(invokeScript);
     }
@@ -156,7 +159,7 @@ export default function Home() {
                         Watch Now
                       </a>
 
-                      {/* Download Button (Only shows if downloadUrl is provided) */}
+                      {/* Download Button */}
                       {movie.downloadUrl && (
                         <a
                           href={movie.downloadUrl}
