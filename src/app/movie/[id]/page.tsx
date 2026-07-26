@@ -1,69 +1,110 @@
-import React from 'react';
-import VideoPlayer from '@/app/components/VideoPlayer';
+'use client';
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
 
-export default async function MovieDetailPage({ params }: PageProps) {
-  const { id } = params;
-  
-  let movie: any = null;
-  try {
-    const res = await fetch(`https://movie-platform-backend-g5w5.onrender.com/api/movies/${id}`, {
-      cache: 'no-store',
-    });
-    if (res.ok) {
-      movie = await res.json();
-    }
-  } catch (error) {
-    console.error('Failed to fetch movie details:', error);
+// Dynamically import Plyr to prevent server-side rendering issues
+const Plyr = dynamic(() => import('plyr-react'), { ssr: false });
+import 'plyr-react/plyr.css';
+
+export default function MovieDetail() {
+  const { id } = useParams();
+  const [movie, setMovie] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    fetch(`https://movie-platform-backend-g5w5.onrender.com/api/movies/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setMovie(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching movie details:', err);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+        <p className="animate-pulse">Loading stream...</p>
+      </div>
+    );
   }
 
   if (!movie) {
     return (
-      <main className="max-w-6xl mx-auto px-4 py-16 text-center text-white">
-        <h1 className="text-2xl font-bold">Movie not found</h1>
-        <p className="text-gray-400 mt-2">The requested movie could not be loaded.</p>
-      </main>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
+        <h2 className="text-2xl font-bold mb-4">Movie Not Found</h2>
+        <Link href="/" className="px-4 py-2 bg-red-600 rounded-lg">Back to Home</Link>
+      </div>
     );
   }
 
-  return (
-    <main className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">{movie.title}</h1>
-      
-      {/* Video Stream Player */}
-      <VideoPlayer videoUrl={movie.videoUrl || ''} />
+  // Configure video source for Plyr
+  const videoSrc = {
+    type: 'video' as const,
+    sources: [
+      {
+        src: movie.videoUrl,
+        provider: 'html5' as const,
+      },
+    ],
+  };
 
-      {/* Direct Download Options Section */}
-      <div className="mt-8 bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl">
-        <h3 className="text-xl font-semibold text-white mb-4">Download Links</h3>
+  return (
+    <div className="min-h-screen bg-black text-white px-4 py-8 md:px-16 max-w-5xl mx-auto">
+      <Link href="/" className="text-sm text-gray-400 hover:text-white mb-6 inline-block">
+        ← Back to Home
+      </Link>
+
+      <h1 className="text-2xl md:text-4xl font-bold mb-6">{movie.title}</h1>
+
+      {/* Streaming Player Section */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden shadow-2xl mb-8">
+        <Plyr source={videoSrc} />
+      </div>
+
+      {/* Direct Download Section (Bollyflix style) */}
+      <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl shadow-xl">
+        <h3 className="text-lg font-semibold mb-4 text-red-500">📥 High-Speed Download Links</h3>
+        
         <div className="flex flex-wrap gap-4">
-          {movie.downloadUrl720p && (
-            <a 
-              href={movie.downloadUrl720p} 
+          {movie.downloadUrl720p ? (
+            <a
+              href={movie.downloadUrl720p}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium border border-gray-700 transition"
+              className="flex-1 min-w-[200px] py-3 px-6 bg-blue-600 hover:bg-blue-700 text-center font-semibold rounded-lg transition shadow-lg"
             >
-              Download 720p
+              Download 720p (HD)
             </a>
+          ) : (
+            <button disabled className="flex-1 min-w-[200px] py-3 px-6 bg-gray-800 text-gray-500 cursor-not-allowed rounded-lg">
+              720p Unavailable
+            </button>
           )}
-          {movie.downloadUrl1080p && (
-            <a 
-              href={movie.downloadUrl1080p} 
+
+          {movie.downloadUrl1080p ? (
+            <a
+              href={movie.downloadUrl1080p}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition"
+              className="flex-1 min-w-[200px] py-3 px-6 bg-red-600 hover:bg-red-700 text-center font-semibold rounded-lg transition shadow-lg"
             >
-              Download 1080p
+              Download 1080p (FHD)
             </a>
+          ) : (
+            <button disabled className="flex-1 min-w-[200px] py-3 px-6 bg-gray-800 text-gray-500 cursor-not-allowed rounded-lg">
+              1080p Unavailable
+            </button>
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }
