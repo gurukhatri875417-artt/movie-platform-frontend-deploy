@@ -1,129 +1,169 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function AdminPage() {
+export default function AdminPanel() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passcode, setPasscode] = useState('');
+  const [movies, setMovies] = useState<any[]>([]);
+  
+  // Form state
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('Action');
-  const [posterUrl, setPosterUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
-  const [statusMessage, setStatusMessage] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [posterUrl, setPosterUrl] = useState('');
+  const [downloadUrl720p, setDownloadUrl720p] = useState('');
+  const [downloadUrl1080p, setDownloadUrl1080p] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setStatusMessage('');
-
-    try {
-      const backendUrl = 'https://movie-platform-backend-g5w5.onrender.com';
-      const res = await fetch(`${backendUrl}/movies`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          category,
-          posterUrl,
-          videoUrl,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to upload movie to backend.');
-      }
-
-      setStatusMessage('🎉 Movie uploaded successfully!');
-      setTitle('');
-      setPosterUrl('');
-      setVideoUrl('');
-    } catch (err: any) {
-      setStatusMessage(`❌ Error: ${err.message || 'Something went wrong'}`);
-    } finally {
-      setLoading(false);
+    // Set your secure admin password here for multi-user access
+    if (passcode === 'my-secure-admin-password-123') {
+      setIsAuthenticated(true);
+      localStorage.setItem('admin_auth', 'true');
+    } else {
+      alert('Incorrect Admin Passcode! Access Denied.');
     }
   };
 
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f4f6f9', fontFamily: 'Arial, sans-serif', padding: '20px' }}>
-      {/* Header */}
-      <header style={{ backgroundColor: '#1f2937', color: '#fff', padding: '15px 30px', borderRadius: '8px', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ margin: 0, fontSize: '20px' }}>🛠️ Movie Admin Panel</h1>
-        <a href="/" style={{ color: '#93c5fd', textDecoration: 'none', fontSize: '14px' }}>&larr; Back to Site</a>
-      </header>
+  useEffect(() => {
+    if (localStorage.getItem('admin_auth') === 'true') {
+      setIsAuthenticated(true);
+      fetchMovies();
+    }
+  }, []);
 
-      {/* Form Container */}
-      <div style={{ maxWidth: '500px', margin: '0 auto', backgroundColor: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ marginTop: 0, marginBottom: '20px', color: '#111827', fontSize: '22px' }}>Upload New Movie</h2>
+  const fetchMovies = async () => {
+    try {
+      const res = await fetch('https://movie-platform-backend-g5w5.onrender.com/api/movies');
+      const data = await res.json();
+      setMovies(data);
+    } catch (err) {
+      console.error('Error fetching movies', err);
+    }
+  };
 
-        {statusMessage && (
-          <div style={{ padding: '12px', marginBottom: '20px', borderRadius: '4px', backgroundColor: statusMessage.includes('🎉') ? '#def7ec' : '#fde8e8', color: statusMessage.includes('🎉') ? '#03543f' : '#9b1c1c', fontSize: '14px' }}>
-            {statusMessage}
-          </div>
-        )}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('https://movie-platform-backend-g5w5.onrender.com/api/movies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          videoUrl,
+          posterUrl,
+          downloadUrl720p,
+          downloadUrl1080p,
+        }),
+      });
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#374151', fontSize: '14px' }}>Movie Title</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Inception"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '16px', boxSizing: 'border-box' }}
-            />
-          </div>
+      if (res.ok) {
+        alert('Movie published successfully with streaming & download links!');
+        setTitle('');
+        setVideoUrl('');
+        setPosterUrl('');
+        setDownloadUrl720p('');
+        setDownloadUrl1080p('');
+        fetchMovies();
+      } else {
+        alert('Failed to publish movie.');
+      }
+    } catch (err) {
+      console.error('Error saving movie', err);
+    }
+  };
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#374151', fontSize: '14px' }}>Category</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '16px', backgroundColor: '#fff', boxSizing: 'border-box' }}
-            >
-              <option value="Action">Action</option>
-              <option value="Sci-Fi">Sci-Fi</option>
-              <option value="Drama">Drama</option>
-              <option value="Comedy">Comedy</option>
-              <option value="Horror">Horror</option>
-            </select>
-          </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#374151', fontSize: '14px' }}>Poster Image URL</label>
-            <input
-              type="url"
-              required
-              placeholder="https://example.com/poster.jpg"
-              value={posterUrl}
-              onChange={(e) => setPosterUrl(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '16px', boxSizing: 'border-box' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#374151', fontSize: '14px' }}>Video Streaming URL</label>
-            <input
-              type="url"
-              required
-              placeholder="https://example.com/movie.mp4"
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '16px', boxSizing: 'border-box' }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ backgroundColor: '#2563eb', color: '#fff', padding: '14px', border: 'none', borderRadius: '6px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}
-          >
-            {loading ? 'Uploading...' : 'Publish Movie'}
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <form onSubmit={handleLogin} className="bg-gray-900 border border-gray-800 p-8 rounded-xl max-w-md w-full shadow-2xl">
+          <h2 className="text-2xl font-bold text-white mb-2 text-center">Restricted Admin Portal</h2>
+          <p className="text-gray-400 text-sm mb-6 text-center">Enter your authorized administrative passcode.</p>
+          <input
+            type="password"
+            placeholder="Enter Admin Passcode"
+            value={passcode}
+            onChange={(e) => setPasscode(e.target.value)}
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white mb-4 focus:outline-none focus:border-red-600"
+            required
+          />
+          <button type="submit" className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+            Authenticate & Login
           </button>
         </form>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white p-6 md:p-10 max-w-6xl mx-auto">
+      <div className="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+        <h1 className="text-3xl font-bold">Admin Content Hub</h1>
+        <button
+          onClick={() => {
+            localStorage.removeItem('admin_auth');
+            setIsAuthenticated(false);
+          }}
+          className="px-4 py-2 bg-gray-800 hover:bg-red-600 text-sm rounded-lg transition"
+        >
+          Logout Session
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-800 p-6 rounded-xl mb-12 shadow-xl">
+        <h3 className="text-xl font-semibold mb-4 text-red-500">Upload New Title & Download Links</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <input
+            type="text"
+            placeholder="Movie Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-600"
+          />
+          <input
+            type="text"
+            placeholder="Poster Image URL"
+            value={posterUrl}
+            onChange={(e) => setPosterUrl(e.target.value)}
+            required
+            className="px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-600"
+          />
+        </div>
+
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Streaming Video URL / Embed Link"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            required
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-600"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <input
+            type="text"
+            placeholder="720p Download Link (Optional)"
+            value={downloadUrl720p}
+            onChange={(e) => setDownloadUrl720p(e.target.value)}
+            className="px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-600"
+          />
+          <input
+            type="text"
+            placeholder="1080p Download Link (Optional)"
+            value={downloadUrl1080p}
+            onChange={(e) => setDownloadUrl1080p(e.target.value)}
+            className="px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-600"
+          />
+        </div>
+
+        <button type="submit" className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition">
+          Publish to Live Site
+        </button>
+      </form>
     </div>
   );
 }
