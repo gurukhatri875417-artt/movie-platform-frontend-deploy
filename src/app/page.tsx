@@ -22,13 +22,14 @@ export default function Home() {
       });
   }, []);
 
-  // Filter movies based on search query and category
+  // Filter movies based on search query and Bollyflix categories
   const filteredMovies = movies.filter((movie) => {
     const matchesSearch = movie.title.toLowerCase().includes(searchQuery.toLowerCase());
     if (selectedCategory === 'All') return matchesSearch;
     if (selectedCategory === '720p') return matchesSearch && movie.downloadUrl720p;
     if (selectedCategory === '1080p') return matchesSearch && movie.downloadUrl1080p;
-    return matchesSearch;
+    // Fallback filter check for title keywords if categorized by name tags
+    return matchesSearch && movie.title.toLowerCase().includes(selectedCategory.toLowerCase());
   });
 
   if (loading) {
@@ -46,31 +47,32 @@ export default function Home() {
         <h1 className="text-3xl font-extrabold text-red-600 tracking-wider">HBHUB</h1>
       </header>
 
-      {/* Search Bar and Category Filters */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8 justify-between items-center">
+      {/* Search Bar */}
+      <div className="mb-4">
         <input
           type="text"
           placeholder="Search movies..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full md:w-96 px-4 py-3 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-red-600"
+          className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-red-600 shadow-inner"
         />
+      </div>
 
-        <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-          {['All', '720p', '1080p'].map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition ${
-                selectedCategory === category
-                  ? 'bg-red-600 text-white'
-                  : 'bg-gray-900 text-gray-400 border border-gray-800 hover:text-white'
-              }`}
-            >
-              {category === 'All' ? 'All Movies' : `${category} HD`}
-            </button>
-          ))}
-        </div>
+      {/* Bollyflix Category Bar */}
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
+        {['All', 'Bollywood', 'Hollywood', 'South', 'Dual Audio', '720p', '1080p'].map((category) => (
+          <button
+            key={category}
+            onClick={() => setSelectedCategory(category)}
+            className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition uppercase tracking-wider ${
+              selectedCategory === category
+                ? 'bg-red-600 text-white shadow-lg'
+                : 'bg-gray-900 text-gray-300 border border-gray-800 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            {category}
+          </button>
+        ))}
       </div>
 
       {/* Native Bar Ad Section */}
