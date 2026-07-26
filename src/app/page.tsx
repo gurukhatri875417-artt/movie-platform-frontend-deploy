@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import AdBanner from './AdBanner';
 
 interface Movie {
   _id: string;
@@ -33,43 +34,16 @@ export default function Home() {
       });
   }, []);
 
-  // Reliable Adsterra Script Injector
+  // Inject Popunder Script Globally
   useEffect(() => {
-    // 1. Inject Popunder Script
     const popunderScript = document.createElement('script');
     popunderScript.type = 'text/javascript';
     popunderScript.src = 'https://pl28414418.effectivecpmrate.com/62/70/ec/6270ec0865dd197d1cd7c34b6b158025.js';
     popunderScript.async = true;
     document.body.appendChild(popunderScript);
-
-    // 2. Inject Native Banner Options & Script
-    const bannerContainer = document.getElementById('adsterra-native-banner');
-    if (bannerContainer) {
-      bannerContainer.innerHTML = ''; // Clear out to prevent duplicates
-
-      const optionsScript = document.createElement('script');
-      optionsScript.type = 'text/javascript';
-      optionsScript.innerHTML = `
-        atOptions = {
-          'key' : '0014a5840d21e847c2111cd988ca5f89',
-          'format' : 'iframe',
-          'height' : 90,
-          'width' : 728,
-          'params' : {}
-        };
-      `;
-
-      const invokeScript = document.createElement('script');
-      invokeScript.type = 'text/javascript';
-      invokeScript.async = true;
-      invokeScript.src = '//pl28414451.effectivecpmrate.com/0014a5840d21e847c2111cd988ca5f89/invoke.js';
-
-      bannerContainer.appendChild(optionsScript);
-      bannerContainer.appendChild(invokeScript);
-    }
   }, []);
 
-  // Filter movies based on search and category
+  // Filter movies
   const filteredMovies = movies.filter((movie) => {
     const matchesSearch = movie.title?.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || movie.category === selectedCategory;
@@ -98,10 +72,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Adsterra Native Banner Section */}
-      <div className="w-full py-4 flex justify-center bg-gray-950 border-b border-gray-900">
-        <div id="adsterra-native-banner" className="min-h-[90px] flex items-center justify-center"></div>
-      </div>
+      {/* Adsterra Native Banner Component */}
+      <AdBanner />
 
       {/* Category Filter Bar */}
       <div className="max-w-7xl mx-auto px-6 py-6 flex gap-2 overflow-x-auto scrollbar-none">
